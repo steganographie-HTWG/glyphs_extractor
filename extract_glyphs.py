@@ -26,9 +26,7 @@ for font_filename in os.listdir(input_path):
             selection.select(("more", None), umlaut_id)
 
     for glyph_id in selection:
-        try:
+        if glyph_id in font:
             glyph_filename = f"{glyph_id}_{font_filename[:-4]}_{font[glyph_id].glyphname}.svg"
 
             font[glyph_id].export(os.path.join(glyph_folder, glyph_filename))
-        except TypeError as e:
-            pass
