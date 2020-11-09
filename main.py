@@ -6,11 +6,10 @@ import shutil
 import glyphs_svg_to_png
 
 
-def _run_fontforge(input_path, output_path):
+def _run_fontforge(input_path, output_path, extract_all):
     # Need to call this script by using subprocess.
     # see: https://fontforge.org/docs/scripting/python/fontforge.html
-    subprocess.call(['fontforge', "-lang=py", "-script", "extract_glyphs.py", input_path, output_path],
-                    stdout=open(os.devnull, 'wb'))
+    subprocess.call(['fontforge', "-lang=py", "-script", "extract_glyphs.py", input_path, output_path, str(extract_all)])
 
 
 def main():
@@ -29,9 +28,6 @@ def main():
     if not os.path.isdir(args.output_path):
         raise NotADirectoryError(args.output_path)
 
-    if args.extract_all:
-        raise NotImplemented("This function is not yet implemented.")
-
     if not args.svg and not args.png:
         parser.error("At least -svg or -png (or both) must be set.")
 
@@ -39,7 +35,7 @@ def main():
     png_path = os.path.join(args.output_path, 'glyphs_png')
 
     # Extract glyphs from fonts as svg using Fontforge.
-    _run_fontforge(args.input_path, svg_path)
+    _run_fontforge(args.input_path, svg_path, args.extract_all)
 
     if args.png:
         # Convert svg files to png using Inkscape.
