@@ -6,20 +6,15 @@ import shutil
 import glyphs_svg_to_png
 
 
-def _run_fontforge(input_path, output_path, extract_all):
-    # Need to call this script by using subprocess.
-    # see: https://fontforge.org/docs/scripting/python/fontforge.html
-    subprocess.call(['fontforge', "-lang=py", "-script", "extract_glyphs.py", input_path, output_path, str(extract_all)])
-
-
 def main():
-    parser = argparse.ArgumentParser(description="Extract glyphs from font-files.")
-    parser.add_argument("-i", "--input_path", type=str, required=True)
-    parser.add_argument("-o", "--output_path", type=str, required=True)
-    parser.add_argument("-svg", "--svg", action="store_true", help="Convert to SVG files. Default: True")
-    parser.add_argument("-png", "--png", action="store_true", help="Convert to PNG files. Default: True")
+    parser = argparse.ArgumentParser(description="Extract glyphs from font files.")
+    parser.add_argument("-i", "--input_path", type=str, required=True, help="Directory containing all font files.")
+    parser.add_argument("-o", "--output_path", type=str, required=True,
+                        help="Directory where all exports will be saved")
+    parser.add_argument("-svg", "--svg", action="store_true", help="Convert font to SVG files.")
+    parser.add_argument("-png", "--png", action="store_true", help="Convert font to PNG files.")
     parser.add_argument("-e", "--extract_all", action="store_true",
-                        help="If False, this script extracts only A-Z, a-z & öäü, else it extracts all glpyhs.")
+                        help="If set this script extracts all available glyphs, else it extracts only A-Z, a-z & öäü.")
     args = parser.parse_args()
 
     if not os.path.isdir(args.input_path):
@@ -35,7 +30,11 @@ def main():
     png_path = os.path.join(args.output_path, 'glyphs_png')
 
     # Extract glyphs from fonts as svg using Fontforge.
-    _run_fontforge(args.input_path, svg_path, args.extract_all)
+    #
+    # Need to call this script by using subprocess.
+    # see: https://fontforge.org/docs/scripting/python/fontforge.html
+    subprocess.call(['fontforge', "-lang=py", "-script", "extract_glyphs.py",
+                     args.input_path, svg_path, str(args.extract_all)])
 
     if args.png:
         # Convert svg files to png using Inkscape.
