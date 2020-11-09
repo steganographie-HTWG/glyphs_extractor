@@ -1,16 +1,24 @@
 import os
 import argparse
 import subprocess
+import shutil
 
 import glyphs_svg_to_png
+
+
+def _run_fontforge(input_path, ouput_path):
+    # Need to call this script by using subprocess.
+    # see: https://fontforge.org/docs/scripting/python/fontforge.html
+    subprocess.call(['fontforge', "-lang=py", "-script", "extract_glyphs.py", input_path, ouput_path],
+                    stdout=open(os.devnull, 'wb'))
 
 
 def main():
     parser = argparse.ArgumentParser(description="Extract glyphs from font-files.")
     parser.add_argument("-i", "--input_path", type=str, required=True)
     parser.add_argument("-o", "--output_path", type=str, required=True)
-    parser.add_argument("-r", "--remove_svg", action="store_true",
-                        help="If True, removes all svg files.")
+    parser.add_argument("-svg", "--svg", action="store_true", help="Convert to SVG files. Default: True")
+    parser.add_argument("-png", "--png", action="store_true", help="Convert to PNG files. Default: True")
     parser.add_argument("-e", "--extract_all", action="store_true",
                         help="If False, this script extracts only A-Z, a-z & öäü, else it extracts all glpyhs.")
     args = parser.parse_args()
@@ -21,19 +29,33 @@ def main():
     if not os.path.isdir(args.output_path):
         raise NotADirectoryError(args.output_path)
 
-    if args.remove_svg:
-        raise NotImplemented("This function is not yet implemented.")
-
     if args.extract_all:
         raise NotImplemented("This function is not yet implemented.")
 
-    subprocess.call(['fontforge', "-lang=py", "-script", "extract_glyphs.py", args.input_path, args.output_path],
-                    stdout=open(os.devnull, 'wb'))
+    svg_path = os.path.join(args.output_path, 'glyphs_svg')
+    png_path = os.path.join(args.output_path, 'glyphs_png')
 
-    glyphs_svg_to_png.convert_svg_to_png(
-        svg_glyph_path=os.path.join(args.output_path, 'glyphs_svg'),
-        output_path=args.output_path
-    )
+    if args.svg:
+        # Extract glyphs from fonts as svg using Fontforge.
+        _run_fontforge(args.input_path, svg_path)
+
+    if args.png:
+        if not args.svg:
+            # Extract glyphs from fonts as svg using Fontforge, if not already done.
+            _run_fontforge(args.input_path, svg_path)
+
+        # Convert svg files to png using Inkscape.
+        glyphs_svg_to_png.convert_svg_to_png(
+            svg_glyph_path=svg_path,
+            output_path=png_path
+        )
+
+        if not args.svg:
+            # Remove svg files, if not wanted.
+            shutil.rmtree(svg_path)
+
+    if not args.svg and not args.png:
+        parser.error("Either -svg or -png must be set.")
 
 
 if __name__ == "__main__":

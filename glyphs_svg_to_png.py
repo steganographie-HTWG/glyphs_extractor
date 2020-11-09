@@ -15,15 +15,12 @@ def convert_svg_to_png(svg_glyph_path, output_path):
 
     for (dirpath, dirnames, filenames) in os.walk(svg_glyph_path):
         if dirpath != svg_glyph_path:
-            png_dir = path.join(output_path, 'glyphs_png', path.split(dirpath)[1])
+            png_dir = path.join(output_path, path.split(dirpath)[1])
             pathlib.Path(png_dir).mkdir(parents=True, exist_ok=True)
 
             for filename in filenames:
                 svg_filepath = path.join(dirpath, filename)
                 png_filepath = path.join(png_dir, path.splitext(filename)[0] + '.png')
-
-                print(svg_filepath)
-                print(png_filepath)
 
                 subprocess.call(['inkscape', svg_filepath, '-z', '-D', '-e', png_filepath, '-b', 'white'], stdout=open(os.devnull, 'wb'))
 
