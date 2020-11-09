@@ -1,19 +1,12 @@
 import os
+import sys
 import pathlib
-import fontforge
 
-UMLAUTE = {
-    'adieresis': 'ä',
-    'odieresis': 'ö',
-    'udieresis': 'ü'
-}
+import fontforge
 
 
 def export_glyphs(_glyphID, tag):
     glyphname = font[_glyphID].glyphname
-
-    if glyphname.lower() in UMLAUTE.keys():
-        glyphname = UMLAUTE[glyphname.lower()]
 
     glyph_filename = font_filename[:-4] + tag + glyphname.lower() + '.svg'
 
@@ -21,11 +14,21 @@ def export_glyphs(_glyphID, tag):
     print(glyphID, glyphname)
 
 
-for font_filename in os.listdir('fonts'):
+input_path = sys.argv[1]
+output_path = sys.argv[2]
+
+if not os.path.isdir(input_path):
+    raise NotADirectoryError(input_path)
+
+if not os.path.isdir(output_path):
+    raise NotADirectoryError(output_path)
+
+
+for font_filename in os.listdir(input_path):
     font_path = os.path.join(os.getcwd(), 'fonts', font_filename)
     font = fontforge.open(font_path)
 
-    glyph_folder = os.path.join(os.getcwd(), 'glyphs_svg', font_filename[:-4])
+    glyph_folder = os.path.join(output_path, 'glyphs_svg', font_filename[:-4])
     pathlib.Path(glyph_folder).mkdir(parents=True, exist_ok=True)
 
     # uppercase a-z
