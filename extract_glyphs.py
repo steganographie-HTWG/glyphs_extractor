@@ -27,6 +27,6 @@ for font_filename in os.listdir(input_path):
 
     for glyph_id in selection:
         if glyph_id in font:
-            glyph_filename = f"{glyph_id}_{font_filename[:-4]}_{font[glyph_id].glyphname}.svg"
+            glyph_filename = f"{glyph_id}_{os.path.splitext(font_filename)[0]}_{font[glyph_id].glyphname}.svg"
 
             font[glyph_id].export(os.path.join(glyph_folder, glyph_filename))
